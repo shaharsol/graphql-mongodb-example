@@ -14,7 +14,7 @@ app.use(cors())
 const homePath = '/graphiql'
 const URL = 'http://localhost'
 const PORT = 3001
-const MONGO_URL = 'mongodb://localhost:27017/blog'
+const MONGO_URL = 'mongodb://localhost:27017/graphql-trello'
 
 
 
@@ -22,32 +22,42 @@ export const start = async () => {
   try {
     const db = await MongoClient.connect(MONGO_URL)
 
-    const Posts = db.collection('posts')
+    const Lists = db.collection('lists')
+    const Cards = db.collection('cards')
     const Comments = db.collection('comments')
 
     const typeDefs = [`
       type Query {
-        post(_id: String): Post
-        posts: [Post]
+        list(_id: String): List
+        lists: [List]
+        card(_id: String): Card
         comment(_id: String): Comment
       }
 
-      type Post {
+      type List {
         _id: String
         title: String
-        content: String
+        cards: [Card]
+      }
+
+      type Card {
+        _id: String
+        listId: String
+        title: String
+        list: List
         comments: [Comment]
       }
 
       type Comment {
         _id: String
-        postId: String
+        cardId: String
         content: String
-        post: Post
+        card: Card
       }
 
       type Mutation {
-        createPost(title: String, content: String): Post
+        createList(title: String): List
+        createCard(listId: String, title: String): Card
         createComment(postId: String, content: String): Comment
       }
 
@@ -59,30 +69,45 @@ export const start = async () => {
 
     const resolvers = {
       Query: {
-        post: async (root, {_id}) => {
-          return prepare(await Posts.findOne(ObjectId(_id)))
+        list: async (root, {_id}) => {
+          return prepare(await Lists.findOne(ObjectId(_id)))
         },
-        posts: async () => {
-          return (await Posts.find({}).toArray()).map(prepare)
+        lists: async () => {
+          return (await Lists.find({}).toArray()).map(prepare)
+        },
+        card: async (root, {_id}) => {
+          return prepare(await Cards.findOne(ObjectId(_id)))
         },
         comment: async (root, {_id}) => {
           return prepare(await Comments.findOne(ObjectId(_id)))
         },
       },
-      Post: {
-        comments: async ({_id}) => {
-          return (await Comments.find({postId: _id}).toArray()).map(prepare)
+      List: {
+        cards: async ({_id}) => {
+          return (await Cards.find({listId: _id}).toArray()).map(prepare)
+        }
+      },
+      Card: {
+        list: async ({listId}) => {
+          return prepare(await Lists.findOne(ObjectId(listId)))
+        },
+        comments: async ({cardId}) => {
+          return prepare(await Comments.findOne(ObjectId(cardId)))
         }
       },
       Comment: {
-        post: async ({postId}) => {
-          return prepare(await Posts.findOne(ObjectId(postId)))
+        card: async ({cardId}) => {
+          return prepare(await Cards.findOne(ObjectId(cardId)))
         }
       },
       Mutation: {
-        createPost: async (root, args, context, info) => {
-          const res = await Posts.insertOne(args)
+        createList: async (root, args, context, info) => {
+          const res = await Lists.insertOne(args)
           return prepare(res.ops[0])  // https://mongodb.github.io/node-mongodb-native/3.1/api/Collection.html#~insertOneWriteOpResult
+        },
+        createCard: async (root, args) => {
+          const res = await Cards.insert(args)
+          return prepare(await Cards.findOne({_id: res.insertedIds[1]}))
         },
         createComment: async (root, args) => {
           const res = await Comments.insert(args)
