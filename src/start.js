@@ -107,11 +107,11 @@ export const start = async () => {
         },
         createCard: async (root, args) => {
           const res = await Cards.insert(args)
-          return prepare(await Cards.findOne({_id: res.insertedIds[1]}))
+          return prepare(await Cards.findOne({_id: res.insertedIds[0]}))
         },
         createComment: async (root, args) => {
           const res = await Comments.insert(args)
-          return prepare(await Comments.findOne({_id: res.insertedIds[1]}))
+          return prepare(await Comments.findOne({_id: res.insertedIds[0]}))
         },
       },
     }
