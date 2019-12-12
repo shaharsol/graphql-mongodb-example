@@ -58,7 +58,7 @@ export const start = async () => {
       type Mutation {
         createList(title: String): List
         createCard(listId: String, title: String): Card
-        createComment(postId: String, content: String): Comment
+        createComment(cardId: String, content: String): Comment
       }
 
       schema {
