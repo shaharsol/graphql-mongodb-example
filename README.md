@@ -1,19 +1,36 @@
-# GraphQL-MongoDB-Example
-
-All the important code is in `src/start.js`.
+# GraphQL Trello Example
 
 Install, build and run:
 
 ```
-yarn install
-yarn run build
-yarn start
+npm install
+npm run build
+npm start
 ```
 
-For Local Development 
-
-You need to start Mongodb for Local development 
-
+To see it in action, run some mutations, for example:
 ```
-npm run startdev
+mutation{
+  createList(title:"todo")
+}
+```
+
+`createList`s, then `createCard`s for each list, then `createComment`s for each card, and then!
+
+and then fetch the entire tree
+```
+{lists {
+  _id
+  title
+  cards {
+    _id
+    listId
+    title
+    comments {
+      _id
+      cardId
+      content
+    }
+  }
+}}
 ```

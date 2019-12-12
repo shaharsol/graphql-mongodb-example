@@ -91,8 +91,8 @@ export const start = async () => {
         list: async ({listId}) => {
           return prepare(await Lists.findOne(ObjectId(listId)))
         },
-        comments: async ({cardId}) => {
-          return prepare(await Comments.findOne(ObjectId(cardId)))
+        comments: async ({_id}) => {
+          return (await Comments.find({cardId: _id}).toArray()).map(prepare)
         }
       },
       Comment: {
