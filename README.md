@@ -8,7 +8,7 @@ npm run build
 npm start
 ```
 
-To see it in action, run some mutations, for example:
+To see it in action, run some mutations. `createList`s, then `createCard`s for each list, then `createComment`s for each card. for example:
 ```
 mutation{
   createList(title:"todo")
@@ -22,10 +22,6 @@ mutation{
   createComment(cardId: "{card id returned by prev mutation}", content: "that was fun")
 }
 ```
-
-
-`createList`s, then `createCard`s for each list, then `createComment`s for each card, and then!
-
 and then fetch the entire tree
 ```
 {lists {
